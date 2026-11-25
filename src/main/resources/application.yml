@@ -1,0 +1,28 @@
+spring:
+  application:
+    name: TP-SOA
+
+  datasource:
+    url: jdbc:postgresql://localhost:5432/TP_SOA
+    username: postgres
+    password: ${DB_PASSWORD:rsrb123}
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+
+# Port 8080 (comme dans le TP). Le service Oracle qui l'occupait a ete arrete
+# (OracleXETNSListener, demarrage manuel). Pour le reactiver :
+#   Start-Service OracleXETNSListener
+# et lancer l'application avec la variable d'environnement SERVER_PORT=8081
+server:
+  port: ${SERVER_PORT:8080}
+
+app:
+  security:
+    username: ${APP_SECURITY_USERNAME:Ranim}
+    password: ${APP_SECURITY_PASSWORD:Ranim1234}
+    jwt:
+      secret: ${JWT_SECRET:MDEyMzQ1Njc4OWFiY2RlZjAxMjM0NTY3ODlhYmNkZWY=}
+      expiration-seconds: ${JWT_EXPIRATION_SECONDS:180}

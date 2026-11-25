@@ -1,0 +1,180 @@
+{
+  "info": {
+    "name": "TP-SOA - API Etudiants (Ranim Belguith)",
+    "_postman_id": "a1b2c3d4-0000-4000-8000-000000000001",
+    "description": "Collection pour tester l'API TP-SOA.\n\nORDRE D'UTILISATION :\n1. '1. Login' -> recupere le token automatiquement\n2. '2. Lister' -> liste publique\n3. '3. Ajouter' -> utilise le token automatiquement\n4. '4. Modifier' et '5. Supprimer' -> token aussi\n\nPrerequis : l'application doit tourner sur le port 8080.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8080"
+    },
+    {
+      "key": "token",
+      "value": ""
+    },
+    {
+      "key": "id",
+      "value": "5"
+    }
+  ],
+  "item": [
+    {
+      "name": "0. Accueil (doc de l'API)",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "{{baseUrl}}/",
+          "host": ["{{baseUrl}}"],
+          "path": [""]
+        }
+      }
+    },
+    {
+      "name": "1. Login - recuperer le token JWT (POST + Basic Auth)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const res = pm.response.json();",
+              "pm.collectionVariables.set('token', res.token);",
+              "console.log('>>> Token enregistre automatiquement pour les requetes suivantes !');"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "auth": {
+          "type": "basic",
+          "basic": [
+            { "key": "username", "value": "Ranim", "type": "string" },
+            { "key": "password", "value": "Ranim1234", "type": "string" }
+          ]
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/auth/login",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "auth", "login"]
+        },
+        "description": "POST obligatoire (GET => 405). Basic Auth : Ranim / Ranim1234.\nLe script 'test' sauvegarde le token dans la variable {{token}}."
+      }
+    },
+    {
+      "name": "1bis. Login avec MAUVAIS mot de passe (teste le 401)",
+      "request": {
+        "method": "POST",
+        "auth": {
+          "type": "basic",
+          "basic": [
+            { "key": "username", "value": "Ranim", "type": "string" },
+            { "key": "password", "value": "mauvaisMdp", "type": "string" }
+          ]
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/auth/login",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "auth", "login"]
+        },
+        "description": "Doit renvoyer 401 Unauthorized."
+      }
+    },
+    {
+      "name": "2. Lister les etudiants (GET public)",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "{{baseUrl}}/api/students",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "students"]
+        },
+        "description": "Aucune authentification necessaire (GET public)."
+      }
+    },
+    {
+      "name": "2bis. Voir un etudiant par id (GET public)",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "{{baseUrl}}/api/students/{{id}}",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "students", "{{id}}"]
+        },
+        "description": "Change la variable {{id}} dans l'onglet Variables de la collection."
+      }
+    },
+    {
+      "name": "3. Ajouter un etudiant (POST + Bearer token)",
+      "request": {
+        "method": "POST",
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            { "key": "token", "value": "{{token}}", "type": "string" }
+          ]
+        },
+        "header": [
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"nom\": \"Mohamed\",\n  \"level\": \"L5\"\n}",
+          "options": { "raw": { "language": "json" } }
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/students",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "students"]
+        },
+        "description": "Doit renvoyer 201 Created. Sans token => 401 Unauthorized."
+      }
+    },
+    {
+      "name": "4. Modifier un etudiant (PUT + Bearer token)",
+      "request": {
+        "method": "PUT",
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            { "key": "token", "value": "{{token}}", "type": "string" }
+          ]
+        },
+        "header": [
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"nom\": \"Mohamed Ali\",\n  \"level\": \"M2\"\n}",
+          "options": { "raw": { "language": "json" } }
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/students/{{id}}",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "students", "{{id}}"]
+        },
+        "description": "Doit renvoyer 200 OK avec l'etudiant modifie."
+      }
+    },
+    {
+      "name": "5. Supprimer un etudiant (DELETE + Bearer token)",
+      "request": {
+        "method": "DELETE",
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            { "key": "token", "value": "{{token}}", "type": "string" }
+          ]
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/students/{{id}}",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "students", "{{id}}"]
+        },
+        "description": "Doit renvoyer 204 No Content. Apres, '2bis' sur le meme id renvoie 404."
+      }
+    }
+  ]
+}
